@@ -24,11 +24,10 @@ public class TweetDownloaderRunner {
         for (int i = 0; i < downloaders.length; i++) {
             TweetDownloader obj = new TweetDownloader(i, true);
             obj.addUserIDS(ids);
+            obj.setStartIdx(i * nbFollowerPerThread);
             if (i == downloaders.length - 1) {
-                obj.setStartIdx(i * nbFollowerPerThread);
                 obj.setEndIdx(i * nbFollowerPerThread + nbFollowerPerThread + residue-1);
             } else {
-                obj.setStartIdx(i * nbFollowerPerThread);
                 obj.setEndIdx(i * nbFollowerPerThread + nbFollowerPerThread-1);
             }
             System.out.println("Thread "+i+" starts from "+obj.getStartIdx() +" ends at "+obj.getEndIdx());
