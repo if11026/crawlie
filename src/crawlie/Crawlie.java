@@ -21,11 +21,11 @@ public class Crawlie {
         // TODO code application logic here
         ConfigurationBuilder cb = new ConfigurationBuilder();
         cb.setDebugEnabled(true)
-                .setOAuthConsumerKey("8EOi5qytDfzPT7zsGqLmQ")
-                .setOAuthConsumerSecret("kO3LXBOttjj6Rp1gZcnS5ZgUPswGPHykswMUfnMs")
-                .setOAuthAccessToken("14210583-wldkVlHCwTidbJ3Oi1NIE9xAxQ4vyo3Cvq2tvV2Qy")
-                .setOAuthAccessTokenSecret("kxuQeyJsH5a2n1WBWhQqD7RmpHXT49ZlRvmhhJ5r8w")
-                .setHttpProxyHost("152.118.24.10")
+                .setOAuthConsumerKey("")
+                .setOAuthConsumerSecret("")
+                .setOAuthAccessToken("")
+                .setOAuthAccessTokenSecret("")
+                .setHttpProxyHost("")
                 .setHttpProxyPort(8080);
 
         TwitterFactory tf = new TwitterFactory(cb.build());
