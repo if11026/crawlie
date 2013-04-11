@@ -14,7 +14,7 @@ import java.util.Scanner;
  */
 public class CrawlerConfigReader {
 
-    static CrawlerConfigReader conf = new CrawlerConfigReader("crawlerConfig.txt");
+    static CrawlerConfigReader conf = new CrawlerConfigReader("crawlerNewsConfig.txt");
     private String fileName;
     static final int CONSUMER_KEY = 0;
     static final int CONSUMER_SECRET = 1;

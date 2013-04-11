@@ -77,75 +77,78 @@ public class TweetDownloader implements Runnable {
         return startIdx;
     }
 
-    public String getCurrentTime()
-    {
+    public String getCurrentTime() {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         return sdf.format(cal.getTime());
-        
+
     }
+
     @Override
     public void run() {
         try {
-            int currentIdx = startIdx;
+            
             int fold = 1;
             int cnt = 0;
-            writer = new PrintWriter("tweet-thread" + id + "-" + fold + "-"+getCurrentTime()+".txt");
-            while (currentIdx <= endIdx) {
-                int remaining = getRateLimitStatusUserTimeLine();
-                if (remaining > 0) {
-                    System.out.println("Thread :" + id + " getting the status from index :" + currentIdx + "(" + endIdx + ")" + " call remaining" + remaining);
+            writer = new PrintWriter("tweet-thread" + id + "-" + fold + "-" + getCurrentTime() + ".txt");
+            while (true) {
+                int currentIdx = startIdx;
+                while (currentIdx <= endIdx) {
+                    int remaining = getRateLimitStatusUserTimeLine();
+                    if (remaining > 0) {
+                        System.out.println("Thread :" + id + " getting the status from index :" + currentIdx + "(" + endIdx + ")" + " call remaining" + remaining);
 
-                    ResponseList<Status> statuses = null;
-                    try {
-                        if (userID == null || userID.size() == 0) {
-                            statuses = twitter.getUserTimeline(screenNames.get(currentIdx), new Paging(1, 200));
-                            System.out.println("ScreenName : " + screenNames.get(currentIdx));
-                        } else {
-                            statuses = twitter.getUserTimeline(userID.get(currentIdx), new Paging(1, 200));
-                            System.out.println("ID : " + userID.get(currentIdx));
+                        ResponseList<Status> statuses = null;
+                        try {
+                            if (userID == null || userID.size() == 0) {
+                                statuses = twitter.getUserTimeline(screenNames.get(currentIdx), new Paging(1, 200));
+                                System.out.println("ScreenName : " + screenNames.get(currentIdx));
+                            } else {
+                                statuses = twitter.getUserTimeline(userID.get(currentIdx), new Paging(1, 200));
+                                System.out.println("ID : " + userID.get(currentIdx));
+                            }
+                        } catch (TwitterException ex) {
+                            Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } catch (TwitterException ex) {
-                        Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
 
-                    if (statuses != null) {
-                        cnt++;
-                        for (Status status : statuses) {
-                            writer.print("<Tweet>\n");
-                            writer.print("<statusID>" + status.getId() + "</statusID>\n");
-                            writer.print("<username>" + status.getUser().getScreenName() + "</username>\n");
-                            writer.print("<status>" + status.getText() + "</status>\n");
-                            writer.print("<follower>" + status.getUser().getFollowersCount() + "</follower>\n");
-                            writer.print("<following>" + status.getUser().getFriendsCount() + "</following>\n");
-                            writer.print("<listcount>" + status.getUser().getListedCount() + "</listcount>\n");
-                            writer.print("<replyTo>" + status.getInReplyToScreenName() + "</replyTo>\n");
-                            writer.print("<RTcount>" + status.getRetweetCount() + "</RTCount>\n");
-                            writer.print("<country>" + status.getPlace() + "</country>\n");
-                            writer.print("<language>" + status.getUser().getLang() + "</language>\n");
-                            writer.print("<time>" + status.getCreatedAt() + "</time>\n");
-                            writer.print("<isRT>" + status.isRetweet() + "</isRT>\n");
-                            writer.print("<Location>" + status.getGeoLocation() + "</Location>\n");
-                            writer.print("<isFavorited>" + status.isFavorited() + "</isFavorited>\n");
-                            writer.print("</Tweet>\n");
-                            writer.flush();
+                        if (statuses != null) {
+                            cnt++;
+                            for (Status status : statuses) {
+                                writer.print("<Tweet>\n");
+                                writer.print("<statusID>" + status.getId() + "</statusID>\n");
+                                writer.print("<username>" + status.getUser().getScreenName() + "</username>\n");
+                                writer.print("<status>" + status.getText() + "</status>\n");
+                                writer.print("<follower>" + status.getUser().getFollowersCount() + "</follower>\n");
+                                writer.print("<following>" + status.getUser().getFriendsCount() + "</following>\n");
+                                writer.print("<listcount>" + status.getUser().getListedCount() + "</listcount>\n");
+                                writer.print("<replyTo>" + status.getInReplyToScreenName() + "</replyTo>\n");
+                                writer.print("<RTcount>" + status.getRetweetCount() + "</RTCount>\n");
+                                writer.print("<country>" + status.getPlace() + "</country>\n");
+                                writer.print("<language>" + status.getUser().getLang() + "</language>\n");
+                                writer.print("<time>" + status.getCreatedAt() + "</time>\n");
+                                writer.print("<isRT>" + status.isRetweet() + "</isRT>\n");
+                                writer.print("<Location>" + status.getGeoLocation() + "</Location>\n");
+                                writer.print("<isFavorited>" + status.isFavorited() + "</isFavorited>\n");
+                                writer.print("</Tweet>\n");
+                                writer.flush();
+                            }
+                            if (cnt % 180 == 0) {
+                                writer.close();
+                                fold++;
+                                writer = new PrintWriter("tweet-thread" + id + "-" + fold + ".txt");
+                            }
                         }
-                        if (cnt % 180 == 0) {
-                            writer.close();
-                            fold++;
-                            writer = new PrintWriter("tweet-thread" + id + "-" + fold + ".txt");
+                    } else {
+                        try {
+                            System.out.println("Thread :" + id + " Limit reached, time to sleep for " + DELAY + " seconds");
+                            Thread.sleep(DELAY);
+                            System.out.println("Thread :" + id + " wakes up");
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                } else {
-                    try {
-                        System.out.println("Thread :" + id + " Limit reached, time to sleep for " + DELAY + " seconds");
-                        Thread.sleep(DELAY);
-                        System.out.println("Thread :" + id + " wakes up");
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    currentIdx++;
                 }
-                currentIdx++;
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
