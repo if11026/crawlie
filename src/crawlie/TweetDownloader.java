@@ -7,7 +7,9 @@ package crawlie;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -75,13 +77,20 @@ public class TweetDownloader implements Runnable {
         return startIdx;
     }
 
+    public String getCurrentTime()
+    {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        return sdf.format(cal.getTime());
+        
+    }
     @Override
     public void run() {
         try {
             int currentIdx = startIdx;
             int fold = 1;
             int cnt = 0;
-            writer = new PrintWriter("tweet-thread" + id + "-" + fold + ".txt");
+            writer = new PrintWriter("tweet-thread" + id + "-" + fold + "-"+getCurrentTime()+".txt");
             while (currentIdx <= endIdx) {
                 int remaining = getRateLimitStatusUserTimeLine();
                 if (remaining > 0) {
