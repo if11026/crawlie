@@ -26,6 +26,7 @@ public class TweetDownloader implements Runnable {
     private TwitterFactory twitterFactory;
     private Twitter twitter;
     private ArrayList<Long> userID;
+    private ArrayList<String> screenNames;
     private final long DELAY = 900000;
     private int startIdx;
     private int endIdx;
@@ -52,6 +53,10 @@ public class TweetDownloader implements Runnable {
 
     public void addUserIDS(ArrayList<Long> ids) throws FileNotFoundException {
         userID = ids;
+    }
+
+    public void setScreenNames(ArrayList<String> screenNames) {
+        this.screenNames = screenNames;
     }
 
     public void setEndIdx(int endIdx) {
@@ -81,14 +86,20 @@ public class TweetDownloader implements Runnable {
                 int remaining = getRateLimitStatusUserTimeLine();
                 if (remaining > 0) {
                     System.out.println("Thread :" + id + " getting the status from index :" + currentIdx + "(" + endIdx + ")" + " call remaining" + remaining);
-                    System.out.println("ID : " + userID.get(currentIdx));
+
                     ResponseList<Status> statuses = null;
                     try {
-                        statuses = twitter.getUserTimeline(userID.get(currentIdx));
+                        if (userID == null || userID.size() == 0) {
+                            statuses = twitter.getUserTimeline(screenNames.get(currentIdx), new Paging(1, 200));
+                            System.out.println("ScreenName : " + screenNames.get(currentIdx));
+                        } else {
+                            statuses = twitter.getUserTimeline(userID.get(currentIdx), new Paging(1, 200));
+                            System.out.println("ID : " + userID.get(currentIdx));
+                        }
                     } catch (TwitterException ex) {
                         Logger.getLogger(TweetDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    
+
                     if (statuses != null) {
                         cnt++;
                         for (Status status : statuses) {
