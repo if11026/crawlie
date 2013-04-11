@@ -33,4 +33,17 @@ public class FollowerLoader {
         
         return ids;
     }
+    
+    public ArrayList<String> getFollowerScreenName() throws FileNotFoundException
+    {
+        ArrayList<String> ids = new ArrayList<String>();
+        
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine())
+        {
+            ids.add(scanner.nextLine());
+        }
+        scanner.close();
+        return ids;
+    }
 }
